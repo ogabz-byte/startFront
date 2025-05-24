@@ -1,25 +1,23 @@
 import pool from "../config/db";
-import { ResultSetHeader } from "mysql2";
 
-//creating user model, in other to input a user inside de table we made
+// Create a user
 export const createUser = async (
   name: string,
   email: string,
   hashedPassword: string,
   role: string = "customer"
 ) => {
-  const [result] = await pool.query<ResultSetHeader>(
-    "INSERT INTO users (name, email, password, role) VALUES( ?, ? ,?, ?)",
+  const result = await pool.query(
+    "INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING *",
     [name, email, hashedPassword, role]
   );
-  return result;
+  return result.rows[0];
 };
 
-// finding a user
+// Find user by email
 export const findUserByEmail = async (email: string) => {
-  const [rows] = await pool.query("SELECT * FROM users WHERE email = ?", [
+  const result = await pool.query("SELECT * FROM users WHERE email = $1", [
     email,
   ]);
-  const users = rows as any[];
-  return users[0];
+  return result.rows[0];
 };
